@@ -325,7 +325,7 @@ See [EMail](../email.md) for more information.
     "autoJoin": {
       "bots": false,
       "canLeave": true,
-      "enabled": true,
+      "enabled": true
     },
     "defaultFeatures": [
       "ALIASABLE_NAMES",
