@@ -1,7 +1,5 @@
 # Running the server as a docker container
 
-## Bundle
-
 1. Add an isolated network to share between the server and the database:
 ```sh
 docker network create spacebar-network
@@ -25,8 +23,7 @@ docker run \
   --name spacebar-server \
   --network spacebar-network \
   -e DATABASE=postgres://postgres:postgres@spacebar-db/postgres \
-  -e CONFIG_PATH=/config/config.json \
-  -v ./config:/config \
+  -e CONFIG_PATH=config.json \
   -v ./data:/data \
   ghcr.io/{{ repositories.server }}
 ```
@@ -39,8 +36,7 @@ docker run \
   --name spacebar-server \
   --network spacebar-network \
   -e DATABASE=postgres://postgres:postgres@spacebar-db/postgres \
-  -e CONFIG_PATH=/config/config.json \
-  -v ./config:/config \
+  -e CONFIG_PATH=config.json \
   -v ./data/:/data \
   -p 3001:3001 \
   ghcr.io/{{ repositories.server }}
