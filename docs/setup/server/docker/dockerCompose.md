@@ -46,20 +46,30 @@ services:
     environment:
       - POSTGRES_PASSWORD=postgres
     restart: unless-stopped
+  
+  rabbitmq:
+    image: rabbitmq:4-management-alpine
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    restart: unless-stopped
+    networks:
+      - spacebar-network
 
 networks:
   spacebar-network:
 
 volumes:
   spacebar-db:
+  rabbitmq_data:
 ```
 
 ## Volumes
 
-| Mount               | Type  | Container(s) | Purpose                      |
-|---------------------|-------|--------------|------------------------------|
-| /data               | Bind  | spacebar-*   | All Spacebar persistent data |
-| /var/lib/postgresql | Named | postgres     | Persistent database          |
+| Mount               | Type  | Container(s) | Purpose                           |
+|---------------------|-------|--------------|-----------------------------------|
+| /data               | Bind  | spacebar-*   | All Spacebar persistent data      |
+| /var/lib/postgresql | Named | postgres     | Persistent database               |
+| /var/lib/rabbitmq   | Named | rabbitmq     | Persistent data for message queue |
  
 ## Setup
 
@@ -95,14 +105,15 @@ This will place a few files into the `./data` bind, including `jwt.key` and `jwt
 This covers only what's different for a Docker Compose setup compared to a baremetal install.
 For the full list of config file options, check out the [configuration settings](../configuration/index.md)
 
-| Key                       | Description                                       | Example                         |
-|---------------------------|---------------------------------------------------|---------------------------------|
-| `gateway.endpointPrivate` | Internal (e.g. api-to-cdn) gateway communication  | ws://spacebar-gateway:3001      |
-| `gateway.endpointPublic`  | External (e.g. from a user) gateway communication | wss://spacebar.your.domain      |
-| `cdn.endpointPrivate`     | Internal CDN communication                        | http://spacebar-cdn:3001        |
-| `cdn.gatewayPublic`       | External CDN communication                        | https://cdn.your.domain         |
-| `api.endpointPrivate`     | Internal API communication                        | http://spacebar-api:3001/api/v9 |
-| `api.endpointPublic`      | External API communication                        | https://api.your.domain/api/v9  |
+| Key                       | Description                                        | Example                          |
+|---------------------------|----------------------------------------------------|----------------------------------|
+| `gateway.endpointPrivate` | Internal (e.g. api-to-cdn) gateway communication   | ws://spacebar-gateway:3001       |
+| `gateway.endpointPublic`  | External (e.g. from a user) gateway communication  | wss://spacebar.your.domain       |
+| `cdn.endpointPrivate`     | Internal CDN communication                         | http://spacebar-cdn:3001         |
+| `cdn.gatewayPublic`       | External CDN communication                         | https://cdn.your.domain          |
+| `api.endpointPrivate`     | Internal API communication                         | http://spacebar-api:3001/api/v9  |
+| `api.endpointPublic`      | External API communication                         | https://api.your.domain/api/v9   |
+| `rabbitmq.host`           | Internal communication between Spacebar containers | amqp://guest:guest@rabbitmq:5672 |
 
 3. Bring up the containers
 Everything should be good to go. Run the following command to start the containers running in the background.
@@ -146,7 +157,6 @@ Add the following service to the existing compose file:
 ```shell
   fermi:
     image: fermi:latest
-    env_file: .env
     networks:
       - spacebar-network
     volumes:
